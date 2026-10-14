@@ -1,0 +1,27 @@
+title: Lab - Security Group Membership Changed
+id: 9f7809a8-2eac-4b16-863d-a2c4823f574c
+status: test
+description: Reviews security-enabled group membership changes; determine whether the affected group is privileged in your environment.
+author: Jai Dosajh
+date: 2026-10-14
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4728
+            - 4732
+            - 4756
+    condition: selection
+fields:
+    - Computer
+    - SubjectUserName
+    - TargetUserName
+    - MemberName
+falsepositives:
+    - Approved access changes
+    - Provisioning automation
+level: medium
+tags:
+    - attack.persistence

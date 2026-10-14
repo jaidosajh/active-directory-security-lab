@@ -1,0 +1,23 @@
+title: Lab - PowerShell Script Block Contains Test Indicator
+id: f52160de-aadb-464e-8b88-9ca7c560e028
+status: test
+description: Flags script-block content containing a high-signal lab string for analyst review; broad string matching can be noisy.
+author: Jai Dosajh
+date: 2026-10-14
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains: Invoke-Expression
+    condition: selection
+fields:
+    - Computer
+    - UserId
+    - ScriptBlockText
+falsepositives:
+    - Developer scripts that use dynamic expression evaluation
+level: medium
+tags:
+    - attack.execution
