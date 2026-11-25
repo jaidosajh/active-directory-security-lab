@@ -16,6 +16,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Validate Sigma YAML and Sysmon XML
+        run: |
+          python -m pip install --disable-pip-version-check PyYAML
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          import yaml
+
+          rules = sorted(Path("rules/windows").glob("*.yml"))
+          if not rules:
+              raise SystemExit("No Sigma rules found in rules/windows")
+          for path in rules:
+              with path.open(encoding="utf-8") as stream:
+                  if not isinstance(yaml.safe_load(stream), dict):
+                      raise SystemExit(f"{path}: expected a YAML mapping")
+          print(f"Validated {len(rules)} Sigma YAML files")
+
+          sysmon_path = Path("configs/sysmon/lab-sysmon.xml")
+          root = ET.parse(sysmon_path).getroot()
+          if root.tag != "Sysmon":
+              raise SystemExit(f"{sysmon_path}: expected Sysmon root element")
+          print(f"Validated {sysmon_path}")
+          PY
       - name: Unit tests
         run: python -m unittest discover -s tests -v
       - name: Run synthetic triage demo
