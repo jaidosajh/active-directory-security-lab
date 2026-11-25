@@ -45,7 +45,7 @@ Use a private/internal virtual switch in Hyper-V or an isolated network in Proxm
    python tools/triage_events.py samples/events.jsonl
    ```
 
-The sample dataset contains synthetic event-shaped records and demonstrates three detections: a burst of failed logons, a security group membership change, and suspicious PowerShell indicators. It is not a real Windows event export and does not prove the Sigma rules work in any SIEM.
+The sample dataset contains synthetic event-shaped records and demonstrates three detections: a burst of failed logons, a security group membership change, and suspicious PowerShell indicators. It is not a real Windows event export and does not prove the Sigma rules or Sentinel queries work in a SIEM.
 
 ## What this demonstrates
 
@@ -55,22 +55,25 @@ The sample dataset contains synthetic event-shaped records and demonstrates thre
 - Windows audit policy and Sysmon telemetry configuration
 - Windows Event Forwarding and Windows Event Collector setup
 - Sigma detection authoring with source, tuning notes, and false-positive guidance
+- Microsoft Sentinel KQL examples for on-premises Windows and Entra ID sign-in logs
+- A synthetic failed-logon investigation walkthrough and analyst disposition
 - Offline event triage with synthetic fixtures and unit tests
 - Reproducible documentation and GitHub Actions checks
 
 ## Project status and limitations
 
-- **Built in this repository:** topology, build and validation guides, sample Sysmon XML, three Sigma rules, synthetic JSONL fixtures, Python triage script, tests, and CI.
-- **Not performed by CI:** Windows Server installation, domain creation, GPO application, Sysmon installation, event forwarding, SIEM rule conversion, or end-to-end host testing.
+- **Built in this repository:** topology, build and validation guides, sample Sysmon XML, three Sigma rules, synthetic JSONL fixtures, Python triage script, a synthetic investigation walkthrough, Sentinel KQL examples, tests, and CI.
+- **Not performed by CI or validated live:** Windows Server installation, domain creation, GPO application, Sysmon installation, event forwarding, SIEM rule conversion, KQL execution in a Sentinel workspace, or end-to-end host testing.
 - The Python triage code consumes the normalized JSONL schema documented in [event format](docs/event-format.md). It is an educational demo, not a production SIEM or forensic parser.
-- Sigma rules are examples. Validate field names and event collection against the Windows version, logging configuration, and target SIEM before relying on them.
+- Sigma and KQL examples are starting points. Validate field availability, event collection, and query behavior against the Windows version and target workspace before relying on them.
 - Use synthetic accounts and benign test activity. Never include customer logs, credentials, domain names, or exported production configurations.
 
 ## Repository map
 
-- `docs/` — build sequence, detections, validation, event schema, and response notes
+- `docs/` — build sequence, detections, validation, case studies, event schema, and response notes
 - `configs/sysmon/` — small, reviewed lab configuration
 - `rules/windows/` — portable Sigma rule examples
+- `queries/sentinel/` — Microsoft Sentinel KQL examples
 - `samples/` — synthetic normalized events only
 - `scripts/Get-LabIdentityPosture.ps1` — read-only AD and privileged-group inventory
 - `tools/triage_events.py` — offline detection demonstration

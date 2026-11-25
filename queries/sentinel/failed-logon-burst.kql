@@ -1,0 +1,18 @@
+// Analyst starting point: count event 4625 failures by source in fixed 5-minute bins.
+// Confirm SecurityEvent table coverage and tune thresholds for the target environment.
+let Lookback = 1d;
+let BurstThreshold = 5;
+let WindowSize = 5m;
+SecurityEvent
+| where TimeGenerated >= ago(Lookback)
+| where EventID == 4625
+| where isnotempty(IpAddress)
+| summarize
+    FailureCount = count(),
+    TargetAccounts = make_set(TargetUserName, 20),
+    Computers = make_set(Computer, 10),
+    FirstFailure = min(TimeGenerated),
+    LastFailure = max(TimeGenerated)
+  by SourceIp = IpAddress, WindowStart = bin(TimeGenerated, WindowSize)
+| where FailureCount >= BurstThreshold
+| sort by LastFailure desc

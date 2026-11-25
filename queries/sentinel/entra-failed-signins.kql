@@ -1,0 +1,25 @@
+// Analyst starting point: failed interactive Entra sign-ins by user and IP.
+// Correlation IDs can have multiple log rows; use the latest row as the attempt's final status.
+let Lookback = 24h;
+let FailureThreshold = 5;
+let WindowSize = 15m;
+SigninLogs
+| where TimeGenerated >= ago(Lookback)
+| where IsInteractive == true
+| extend AttemptKey = case(
+    isnotempty(CorrelationId), CorrelationId,
+    isnotempty(Id), Id,
+    tostring(TimeGenerated)
+)
+| summarize arg_max(TimeGenerated, ResultType, ResultDescription, IPAddress, AppDisplayName) by AttemptKey, UserPrincipalName
+| where ResultType != "0"
+| where isnotempty(UserPrincipalName) and isnotempty(IPAddress)
+| summarize
+    FailureCount = count(),
+    Applications = make_set(AppDisplayName, 10),
+    ErrorCodes = make_set(ResultType, 10),
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated)
+  by UserPrincipalName, IPAddress, WindowStart = bin(TimeGenerated, WindowSize)
+| where FailureCount >= FailureThreshold
+| sort by LastSeen desc
